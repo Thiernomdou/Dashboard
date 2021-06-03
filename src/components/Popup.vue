@@ -10,8 +10,8 @@
               </v-card-title>
               <v-form class="px-3" ref="form">
                   <v-card-text>
-                      <v-text-fiel label="title" v-model="title" prepend-icon="folder"></v-text-fiel>
-                      <v-text-area label="Information" v-model="content" prepend-icon="edit"></v-text-area>
+                      <v-text-field label="title" v-model="title" prepend-icon="folder" :rules="inputRules"></v-text-field>
+                      <v-textarea label="Information" v-model="content" prepend-icon="edit" :rules="inputRules"></v-textarea>
                       <v-col cols="12" lg="6">
                           <v-menu 
                             ref="menu1"
@@ -27,6 +27,7 @@
                                     v-model="dateformatted"
                                     label="Date"
                                     hint="MM/DD/YYYY format"
+                                    persistent-hint
                                     prepend-icon="event"
                                     @blur="date =  parseDate(dateFormatted)"
                                     v-on="on"
@@ -53,13 +54,38 @@
 <script>
 export default {
     name: 'Popup',
-    data() {
-        return {
+    data: vm => ({
+       
             dialog: false,
             title: "",
             content: "",
             date: new Date().toDateString().substring(0, 30),
-            dateFormatted
+            dateFormatted: vm.formatDate(new Date().toISOString().substr(0, 10)),
+            menu1: false,
+            inputRules: [
+                v => v.length >= 3 || "Minimum length is 3 characters"
+            ]
+    }),
+    methods: {
+        formatDate(date) {
+            if(!date) return null
+            const [year, month, day] = date.split("-")
+            return `${year}/${month}/${day}`
+        },
+        parseDate(date) {
+            if(!date) return null
+            const [year, month, day] = date.split("/")
+            return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
+        }
+    },
+    computed: {
+        computedDateFormatted() {
+            return this.formatDate(this.date)
+        }
+    },
+    watch: {
+        date() {
+            this.dateFormatted = this.formatDate(this.date)
         }
     }
 }
